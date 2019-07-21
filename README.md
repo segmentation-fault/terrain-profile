@@ -1,5 +1,7 @@
 # terrain-profile
-Retrieves the elevation profile between two points on earth via the open-elevation API. It contains a lass used to construct a terrain profile. It uses the open elevation API - https://open-elevation.com/ . Consider donating.
+Retrieves the elevation profile between two points on earth via the open-elevation API. It contains a class used to construct a terrain profile.
+
+__It uses the open elevation API - https://open-elevation.com/ . Consider donating.__
 
 PS: the elevation API could be slow, and sometimes fail. A binary exponential backoff retry mechanism is in use, and in case of HTTP POST error a PostException (included in the py file) is thrown. If you are behind a proxy consider modifying the method `get_altitude` from the `TerrainProfile` class, e.g. as https://2.python-requests.org/en/master/user/advanced/#proxies .
 
