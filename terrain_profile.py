@@ -163,7 +163,7 @@ class TerrainProfile(object):
     def get_curvature_elevation(dist: float) -> float:
         """
         Given the distance between two points on a sphere, it returns the difference in elevation due to the earth
-        curvature between the two points point due to the curvature.
+        curvature between the two points.
         :param dist: distance in meters
         """
         d = 1e-3 * dist
@@ -175,7 +175,14 @@ class TerrainProfile(object):
 
     @staticmethod
     def get_curvature_profile(p1: Point, p2: Point, n_points: int) -> list:
-
+        """
+        returns the difference in elevation profile due to the earth curvature between the two points, sampled with
+         n_points points
+        :param p1: geopy.Point
+        :param p2: geopy.Point
+        :param n_points: number of samples
+        :return: list of differences in elevation
+        """
         tot_dist = TerrainProfile.get_distance(p1, p2)
 
         # maximum difference in altitude: middle point
