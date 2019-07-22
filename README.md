@@ -25,7 +25,7 @@ The resulting elevation profile is shown below.
 
 ![simple elevation](/examples/pinzolo_andalo.png)
 
-In case one wants to plot the earth curvature between the two points, one can set the plot_curvature flag to `True`:
+In case one wants to plot the earth curvature between the two points, one can set the `plot_curvature` flag to `True`:
 ```python
     from geopy import Point
     from terrain_profile import TerrainProfile
