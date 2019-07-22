@@ -249,7 +249,8 @@ class TerrainProfile(object):
         :param p2: geopy.Point
         :param n_points: number of samples
         :param plot_curvature: if true plots the profile including the earth curvature
-        :return: dict in the form: {"dist": (float) distance in m, "point": geopy.Point with altitude set}
+        :return: dict in the form: {"dist": (float) distance in m, "point": geopy.Point with altitude set,
+        "curvature": difference in height due to the curvature of the earth in m}
         """
         p_ret = self.get_profile(p1, p2, n_points)
 
