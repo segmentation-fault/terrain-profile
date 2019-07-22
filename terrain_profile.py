@@ -186,17 +186,17 @@ class TerrainProfile(object):
         tot_dist = TerrainProfile.get_distance(p1, p2)
 
         # maximum difference in altitude: middle point
-        hmax = TerrainProfile.get_curvature_elevation(tot_dist/2.0)
+        hmax = TerrainProfile.get_curvature_elevation(tot_dist / 2.0)
 
         my_step = 1.0 * tot_dist / n_points
 
         h = [0]
 
         for i in range(1, n_points):
-            if my_step * i < tot_dist/2.0:
-                temp_dist = tot_dist/2.0 - my_step * i
+            if my_step * i < tot_dist / 2.0:
+                temp_dist = tot_dist / 2.0 - my_step * i
             else:
-                temp_dist = my_step * i - tot_dist/2.0
+                temp_dist = my_step * i - tot_dist / 2.0
 
             h_diff = TerrainProfile.get_curvature_elevation(temp_dist)
 
@@ -261,7 +261,7 @@ class TerrainProfile(object):
         """
         p_ret = self.get_profile(p1, p2, n_points)
 
-        alt_min = 1e10 #Used in case of curvature plotting
+        alt_min = 1e10  # Used in case of curvature plotting
 
         x = []
         y = []
