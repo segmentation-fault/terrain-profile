@@ -190,7 +190,7 @@ class TerrainProfile(object):
 
         my_step = 1.0 * tot_dist / n_points
 
-        h = []
+        h = [0]
 
         for i in range(1, n_points):
             if my_step * i < tot_dist/2.0:
