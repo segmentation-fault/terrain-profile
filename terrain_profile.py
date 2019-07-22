@@ -159,13 +159,52 @@ class TerrainProfile(object):
 
         return Point(latitude=lat2, longitude=lon2)
 
+    @staticmethod
+    def get_curvature_elevation(dist: float) -> float:
+        """
+        Given the distance between two points on a sphere, it returns the difference in elevation due to the earth
+        curvature between the two points point due to the curvature.
+        :param dist: distance in meters
+        """
+        d = 1e-3 * dist
+        R = distance.EARTH_RADIUS
+
+        h = R * (1 - cos(d / R))
+
+        return h * 1e3
+
+    @staticmethod
+    def get_curvature_profile(p1: Point, p2: Point, n_points: int) -> list:
+
+        tot_dist = TerrainProfile.get_distance(p1, p2)
+
+        # maximum difference in altitude: middle point
+        hmax = TerrainProfile.get_curvature_elevation(tot_dist/2.0)
+
+        my_step = 1.0 * tot_dist / n_points
+
+        h = []
+
+        for i in range(1, n_points):
+            if my_step * i < tot_dist/2.0:
+                temp_dist = tot_dist/2.0 - my_step * i
+            else:
+                temp_dist = my_step * i - tot_dist/2.0
+
+            h_diff = TerrainProfile.get_curvature_elevation(temp_dist)
+
+            h.append(hmax - h_diff)
+
+        return h
+
     def get_profile(self, p1: Point, p2: Point, n_points: int) -> dict:
         """
         Returns the profile between p1 and p2, sampled with n_points points
         :param p1: geopy.Point
         :param p2: geopy.Point
         :param n_points: number of samples
-        :return: dict in the form: {"dist": (float) distance in m, "point": geopy.Point with altitude set}
+        :return: dict in the form: {"dist": (float) distance in m, "point": geopy.Point with altitude set,
+        "curvature": difference in height due to the curvature of the earth in m}
         """
         dist = TerrainProfile.get_distance(p1, p2)
         bearin = TerrainProfile.get_bearing(p1, p2)
@@ -185,38 +224,59 @@ class TerrainProfile(object):
 
         pointz_alt = self.get_altitude(pointz)
 
+        h_c = TerrainProfile.get_curvature_profile(p1, p2, n_points)
+
         p_ret = []
 
         for el in pointz_alt:
             my_dict = {"dist": -1,
-                       "point": Point(latitude=el["latitude"], longitude=el["longitude"], altitude=el["elevation"])}
+                       "point": Point(latitude=el["latitude"], longitude=el["longitude"], altitude=el["elevation"]),
+                       "curvature": 0}
             p_ret.append(my_dict)
 
         for i in range(0, len(distz)):
             p_ret[i]["dist"] = distz[i]
 
+        for i in range(0, len(h_c)):
+            p_ret[i]["curvature"] = h_c[i]
+
         return p_ret
 
-    def plot_profile(self, p1: Point, p2: Point, n_points: int) -> dict:
+    def plot_profile(self, p1: Point, p2: Point, n_points: int, plot_curvature: bool = False) -> dict:
         """
         Plots and then returns the profile between p1 and p2, sampled with n_points points
         :param p1: geopy.Point
         :param p2: geopy.Point
         :param n_points: number of samples
+        :param plot_curvature: if true plots the profile including the earth curvature
         :return: dict in the form: {"dist": (float) distance in m, "point": geopy.Point with altitude set}
         """
         p_ret = self.get_profile(p1, p2, n_points)
 
+        alt_min = 1e10 #Used in case of curvature plotting
+
         x = []
         y = []
-
-        for p in p_ret:
-            x.append(p["dist"])
-            y.append(p["point"].altitude)
+        y_c = []
 
         plt.figure()
 
-        plt.plot(x, y)
+        for p in p_ret:
+            x.append(p["dist"])
+            if plot_curvature:
+                y_c.append(p["curvature"])
+                y.append(p["point"].altitude + p["curvature"])
+                alt_min = min([p["point"].altitude, alt_min])
+            else:
+                y.append(p["point"].altitude)
+
+        if plot_curvature:
+            for i in range(0, len(y_c)):
+                y_c[i] = y_c[i] + alt_min
+            plt.plot(x, y, 'b')
+            plt.plot(x, y_c, 'r--')
+        else:
+            plt.plot(x, y)
 
         plt.xlabel("distance (m)")
         plt.ylabel("elevation (m)")
@@ -236,3 +296,10 @@ if __name__ == "__main__":
     T = TerrainProfile()
     ret = T.plot_profile(p_pinzolo, p_andalo, n_points)
     print(ret)
+
+    # Plots the terrain profile between Civitavecchia (Italy) and San benedetto del Tronto (Italy), including the earth
+    # curvature
+    p_civitavecchia = Point(latitude=42.087076, longitude=11.796718)
+    p_sbt = Point(latitude=42.947266, longitude=13.888322)
+    n_points = 100
+    ret = T.plot_profile(p_civitavecchia, p_sbt, n_points, plot_curvature=True)
